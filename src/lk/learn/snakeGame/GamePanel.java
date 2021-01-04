@@ -23,6 +23,7 @@ public class GamePanel extends JPanel implements ActionListener {
     int appleY;
     char direction = 'R';
     boolean running = false;
+    boolean isGameOver = false;
     Timer timer;
     Random random;
 
@@ -32,12 +33,20 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
-        startGame();
+    }
+
+    public void initialRender(Graphics g) {
+        //Game Start text
+        g.setColor(Color.green);
+        g.setFont(new Font("Ink Free", Font.BOLD, 40));
+        FontMetrics metrics2 = getFontMetrics(g.getFont());
+        g.drawString("Press Enter To Start The Game", (SCREEN_WIDTH - metrics2.stringWidth("Press Enter To Start The Game")) / 2, SCREEN_HEIGHT / 2);
     }
 
     public void startGame() {
         newApple();
         running = true;
+        isGameOver = false;
         timer = new Timer(DELAY, this);
         timer.start();
     }
@@ -66,8 +75,10 @@ public class GamePanel extends JPanel implements ActionListener {
             g.setFont(new Font("Ink Free", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
-        } else {
+        } else if (isGameOver) {
             gameOver(g);
+        } else {
+            initialRender(g);
         }
 
     }
@@ -113,23 +124,28 @@ public class GamePanel extends JPanel implements ActionListener {
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
+                isGameOver = true;
             }
         }
         //check if head touches left border
         if (x[0] < 0) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches right border
         if (x[0] > SCREEN_WIDTH) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches top border
         if (y[0] < 0) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches bottom border
         if (y[0] > SCREEN_HEIGHT) {
             running = false;
+            isGameOver = true;
         }
 
         if (!running) {
@@ -147,7 +163,7 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        g.drawString("Wasted", (SCREEN_WIDTH - metrics2.stringWidth("Wasted")) / 2, SCREEN_HEIGHT / 2);
     }
 
     @Override
@@ -184,6 +200,11 @@ public class GamePanel extends JPanel implements ActionListener {
                 case KeyEvent.VK_DOWN:
                     if (direction != 'U') {
                         direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_ENTER:
+                    if (!running) {
+                        startGame();
                     }
                     break;
             }
