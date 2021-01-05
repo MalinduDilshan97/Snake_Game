@@ -1,4 +1,4 @@
-package lk.learn.snakeGame;
+package lk.learn.snakeGame.utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +23,7 @@ public class GamePanel extends JPanel implements ActionListener {
     int appleY;
     char direction = 'R';
     boolean running = false;
+    boolean isGameOver = false;
     Timer timer;
     Random random;
 
@@ -32,12 +33,26 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
-        startGame();
     }
 
+    /**
+     * Rendered the screen before game start
+     */
+    public void initialRender(Graphics g) {
+        //Game Start text
+        g.setColor(Color.green);
+        g.setFont(new Font("Ink Free", Font.BOLD, 40));
+        FontMetrics metrics2 = getFontMetrics(g.getFont());
+        g.drawString("Press Enter To Start The Game", (SCREEN_WIDTH - metrics2.stringWidth("Press Enter To Start The Game")) / 2, SCREEN_HEIGHT / 2);
+    }
+
+    /**
+     * Start the game
+     */
     public void startGame() {
         newApple();
         running = true;
+        isGameOver = false;
         timer = new Timer(DELAY, this);
         timer.start();
     }
@@ -47,6 +62,11 @@ public class GamePanel extends JPanel implements ActionListener {
         draw(g);
     }
 
+    /**
+     * Rendered game if running true
+     * Rendered the game over screen if isGameOver is true
+     * Rendered the initial screen if isGameOver is false and running false
+     */
     public void draw(Graphics g) {
 
         if (running) {
@@ -66,17 +86,25 @@ public class GamePanel extends JPanel implements ActionListener {
             g.setFont(new Font("Ink Free", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
-        } else {
+        } else if (isGameOver) {
             gameOver(g);
+        } else {
+            initialRender(g);
         }
 
     }
 
+    /**
+     * Renders the apple randomly on the board
+     */
     public void newApple() {
         appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
     }
 
+    /**
+     * move the snake according to button pressed
+     */
     public void move() {
         for (int i = bodyParts; i > 0; i--) {
             x[i] = x[i - 1];
@@ -100,6 +128,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * Extends body of snake, increase the score and render a new apple
+     */
     public void checkApple() {
         if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts++;
@@ -108,28 +139,36 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    /**
+     * check if snake got hits
+     */
     public void checkCollisions() {
         //checks if head collides with body
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
+                isGameOver = true;
             }
         }
         //check if head touches left border
         if (x[0] < 0) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches right border
         if (x[0] > SCREEN_WIDTH) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches top border
         if (y[0] < 0) {
             running = false;
+            isGameOver = true;
         }
         //check if head touches bottom border
         if (y[0] > SCREEN_HEIGHT) {
             running = false;
+            isGameOver = true;
         }
 
         if (!running) {
@@ -137,6 +176,10 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+
+    /**
+     * renders game over screen
+     */
     public void gameOver(Graphics g) {
         //Score
         g.setColor(Color.red);
@@ -147,7 +190,7 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        g.drawString("Wasted", (SCREEN_WIDTH - metrics2.stringWidth("Wasted")) / 2, SCREEN_HEIGHT / 2);
     }
 
     @Override
@@ -184,6 +227,11 @@ public class GamePanel extends JPanel implements ActionListener {
                 case KeyEvent.VK_DOWN:
                     if (direction != 'U') {
                         direction = 'D';
+                    }
+                    break;
+                case KeyEvent.VK_ENTER:
+                    if (!running) {
+                        startGame();
                     }
                     break;
             }
