@@ -1,4 +1,4 @@
-package lk.learn.snakeGame;
+package lk.learn.snakeGame.utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +35,9 @@ public class GamePanel extends JPanel implements ActionListener {
         this.addKeyListener(new MyKeyAdapter());
     }
 
+    /**
+     * Rendered the screen before game start
+     */
     public void initialRender(Graphics g) {
         //Game Start text
         g.setColor(Color.green);
@@ -43,6 +46,9 @@ public class GamePanel extends JPanel implements ActionListener {
         g.drawString("Press Enter To Start The Game", (SCREEN_WIDTH - metrics2.stringWidth("Press Enter To Start The Game")) / 2, SCREEN_HEIGHT / 2);
     }
 
+    /**
+     * Start the game
+     */
     public void startGame() {
         newApple();
         running = true;
@@ -56,6 +62,11 @@ public class GamePanel extends JPanel implements ActionListener {
         draw(g);
     }
 
+    /**
+     * Rendered game if running true
+     * Rendered the game over screen if isGameOver is true
+     * Rendered the initial screen if isGameOver is false and running false
+     */
     public void draw(Graphics g) {
 
         if (running) {
@@ -83,11 +94,17 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * Renders the apple randomly on the board
+     */
     public void newApple() {
         appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
     }
 
+    /**
+     * move the snake according to button pressed
+     */
     public void move() {
         for (int i = bodyParts; i > 0; i--) {
             x[i] = x[i - 1];
@@ -111,6 +128,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * Extends body of snake, increase the score and render a new apple
+     */
     public void checkApple() {
         if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts++;
@@ -119,6 +139,9 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    /**
+     * check if snake got hits
+     */
     public void checkCollisions() {
         //checks if head collides with body
         for (int i = bodyParts; i > 0; i--) {
@@ -153,6 +176,10 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+
+    /**
+     * renders game over screen
+     */
     public void gameOver(Graphics g) {
         //Score
         g.setColor(Color.red);
