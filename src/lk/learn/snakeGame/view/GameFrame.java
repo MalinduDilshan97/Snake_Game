@@ -1,4 +1,4 @@
-package lk.learn.snakeGame.utils;
+package lk.learn.snakeGame.view;
 
 import javax.swing.*;
 
