@@ -1,4 +1,8 @@
-package lk.learn.snakeGame.utils;
+package lk.learn.snakeGame.view;
+
+import lk.learn.snakeGame.controller.SnakeController;
+import lk.learn.snakeGame.model.Apple;
+import lk.learn.snakeGame.utils.Config;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,41 +14,32 @@ import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener, Runnable {
 
+    private StartGamePanel startGamePanel = new StartGamePanel();
+    private GameOverPanel gameOverPanel = new GameOverPanel();
+    private ScoreCard scoreCard = new ScoreCard();
+    private Apple apple = new Apple();
     private Thread thread;
-    static final int SCREEN_WIDTH = 1280;
-    static final int SCREEN_HEIGHT = 720;
-    static final int UNIT_SIZE = 50;
+    static int SCREEN_WIDTH = Config.SCREEN_WIDTH;
+    static int SCREEN_HEIGHT = Config.SCREEN_HEIGHT;
+    static int UNIT_SIZE = Config.UNIT_SIZE;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 175;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
     int bodyParts = 3;
     int applesEaten;
-    int appleX;
-    int appleY;
-    char direction = 'R';
     boolean running = false;
     boolean isGameOver = false;
     Timer timer;
     Random random;
 
-    GamePanel() {
+    public GamePanel() {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
-    }
-
-    /**
-     * Rendered the screen before game start
-     */
-    public void initialRender(Graphics g) {
-        //Game Start text
-        g.setColor(Color.green);
-        g.setFont(new Font("Ink Free", Font.BOLD, 40));
-        FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Press Enter To Start The Game", (SCREEN_WIDTH - metrics2.stringWidth("Press Enter To Start The Game")) / 2, SCREEN_HEIGHT / 2);
+        this.addKeyListener(new SnakeController());
     }
 
     /**
@@ -72,7 +67,7 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
 
         if (running) {
             g.setColor(Color.red);
-            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+            g.fillOval(apple.getAppleX(), apple.getAppleY(), apple.getAppleSize(), apple.getAppleSize());
 
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -83,31 +78,27 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
-            g.setColor(Color.red);
-            g.setFont(new Font("Ink Free", Font.BOLD, 40));
-            FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
+            scoreCard.renderScoreCard(g, applesEaten);
         } else if (isGameOver) {
             thread.stop();
-            gameOver(g);
+            gameOverPanel.renderGameOverPanel(g, applesEaten);
         } else {
-            initialRender(g);
+            startGamePanel.renderStartGamePanel(g);
         }
-
     }
 
     /**
      * Renders the apple randomly on the board
      */
     public void newApple() {
-        appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-        appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+        apple.setAppleX(random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE);
+        apple.setAppleY(random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE);
     }
 
     @Override
     public void run() {
         try {
-            for(int i = 5; i > 0; i--) {
+            for (int i = 5; i > 0; i--) {
                 newApple();
                 Thread.sleep(10000);
             }
@@ -120,12 +111,13 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
      * move the snake according to button pressed
      */
     public void move() {
+
         for (int i = bodyParts; i > 0; i--) {
             x[i] = x[i - 1];
             y[i] = y[i - 1];
         }
 
-        switch (direction) {
+        switch (SnakeController.direction) {
             case 'U':
                 y[0] = y[0] - UNIT_SIZE;
                 break;
@@ -145,19 +137,17 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
         try {
             thread = new Thread(this);
             thread.start();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
      * Extends body of snake, increase the score and render a new apple
      */
     public void checkApple() {
-        if ((x[0] == appleX) && (y[0] == appleY)) {
+        if ((x[0] == apple.getAppleX()) && (y[0] == apple.getAppleY())) {
             thread.stop();
-            System.out.println("stoped");
             bodyParts++;
             applesEaten++;
             start();
@@ -202,23 +192,6 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
         }
     }
 
-
-    /**
-     * renders game over screen
-     */
-    public void gameOver(Graphics g) {
-        //Score
-        g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 40));
-        FontMetrics metrics1 = getFontMetrics(g.getFont());
-        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics1.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
-        //Game Over text
-        g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
-        FontMetrics metrics2 = getFontMetrics(g.getFont());
-        g.drawString("Wasted", (SCREEN_WIDTH - metrics2.stringWidth("Wasted")) / 2, SCREEN_HEIGHT / 2);
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -234,26 +207,6 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
         @Override
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT:
-                    if (direction != 'R') {
-                        direction = 'L';
-                    }
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (direction != 'L') {
-                        direction = 'R';
-                    }
-                    break;
-                case KeyEvent.VK_UP:
-                    if (direction != 'D') {
-                        direction = 'U';
-                    }
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (direction != 'U') {
-                        direction = 'D';
-                    }
-                    break;
                 case KeyEvent.VK_ENTER:
                     if (!running) {
                         startGame();
