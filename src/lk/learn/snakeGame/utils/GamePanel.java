@@ -8,8 +8,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 
-public class GamePanel extends JPanel implements ActionListener {
+public class GamePanel extends JPanel implements ActionListener, Runnable {
 
+    private Thread thread;
     static final int SCREEN_WIDTH = 1280;
     static final int SCREEN_HEIGHT = 720;
     static final int UNIT_SIZE = 50;
@@ -50,7 +51,7 @@ public class GamePanel extends JPanel implements ActionListener {
      * Start the game
      */
     public void startGame() {
-        newApple();
+        start();
         running = true;
         isGameOver = false;
         timer = new Timer(DELAY, this);
@@ -87,6 +88,7 @@ public class GamePanel extends JPanel implements ActionListener {
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
         } else if (isGameOver) {
+            thread.stop();
             gameOver(g);
         } else {
             initialRender(g);
@@ -100,6 +102,18 @@ public class GamePanel extends JPanel implements ActionListener {
     public void newApple() {
         appleX = random.nextInt((int) (SCREEN_WIDTH / UNIT_SIZE)) * UNIT_SIZE;
         appleY = random.nextInt((int) (SCREEN_HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+    }
+
+    @Override
+    public void run() {
+        try {
+            for(int i = 5; i > 0; i--) {
+                newApple();
+                Thread.sleep(10000);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -125,6 +139,15 @@ public class GamePanel extends JPanel implements ActionListener {
                 x[0] = x[0] + UNIT_SIZE;
                 break;
         }
+    }
+
+    public void start() {
+        try {
+            thread = new Thread(this);
+            thread.start();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
@@ -133,11 +156,14 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public void checkApple() {
         if ((x[0] == appleX) && (y[0] == appleY)) {
+            thread.stop();
+            System.out.println("stoped");
             bodyParts++;
             applesEaten++;
-            newApple();
+            start();
         }
     }
+
 
     /**
      * check if snake got hits
@@ -202,7 +228,6 @@ public class GamePanel extends JPanel implements ActionListener {
             checkCollisions();
         }
         repaint();
-
     }
 
     public class MyKeyAdapter extends KeyAdapter {
