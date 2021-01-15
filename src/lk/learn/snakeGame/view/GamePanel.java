@@ -2,7 +2,9 @@ package lk.learn.snakeGame.view;
 
 import lk.learn.snakeGame.controller.SnakeController;
 import lk.learn.snakeGame.model.Apple;
-import lk.learn.snakeGame.utils.Config;
+import lk.learn.snakeGame.model.Score;
+import lk.learn.snakeGame.model.Snake;
+import lk.learn.snakeGame.utils.Util;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,16 +20,16 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
     private GameOverPanel gameOverPanel = new GameOverPanel();
     private ScoreCard scoreCard = new ScoreCard();
     private Apple apple = new Apple();
+    private Snake snake = new Snake();
+    private Score score = new Score();
     private Thread thread;
-    static int SCREEN_WIDTH = Config.SCREEN_WIDTH;
-    static int SCREEN_HEIGHT = Config.SCREEN_HEIGHT;
-    static int UNIT_SIZE = Config.UNIT_SIZE;
+    static int SCREEN_WIDTH = Util.SCREEN_WIDTH;
+    static int SCREEN_HEIGHT = Util.SCREEN_HEIGHT;
+    static int UNIT_SIZE = Util.UNIT_SIZE;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 175;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
-    int bodyParts = 3;
-    int applesEaten;
     boolean running = false;
     boolean isGameOver = false;
     Timer timer;
@@ -66,22 +68,22 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
     public void draw(Graphics g) {
 
         if (running) {
-            g.setColor(Color.red);
+            g.setColor(apple.getAppleColor());
             g.fillOval(apple.getAppleX(), apple.getAppleY(), apple.getAppleSize(), apple.getAppleSize());
 
-            for (int i = 0; i < bodyParts; i++) {
+            for (int i = 0; i < snake.getSnakeBodyPart(); i++) {
                 if (i == 0) {
-                    g.setColor(Color.green);
+                    g.setColor(snake.getSnakeHeadColor());
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 } else {
-                    g.setColor(new Color(45, 180, 0));
+                    g.setColor(snake.getSnakeBodyColor());
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
-            scoreCard.renderScoreCard(g, applesEaten);
+            scoreCard.renderScoreCard(g, score.getScore());
         } else if (isGameOver) {
             thread.stop();
-            gameOverPanel.renderGameOverPanel(g, applesEaten);
+            gameOverPanel.renderGameOverPanel(g, score.getScore());
         } else {
             startGamePanel.renderStartGamePanel(g);
         }
@@ -112,7 +114,7 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
      */
     public void move() {
 
-        for (int i = bodyParts; i > 0; i--) {
+        for (int i = snake.getSnakeBodyPart(); i > 0; i--) {
             x[i] = x[i - 1];
             y[i] = y[i - 1];
         }
@@ -148,8 +150,8 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
     public void checkApple() {
         if ((x[0] == apple.getAppleX()) && (y[0] == apple.getAppleY())) {
             thread.stop();
-            bodyParts++;
-            applesEaten++;
+            snake.setSnakeBodyPart(snake.getSnakeBodyPart() + 1);
+            score.setScore(score.getScore() + 1);
             start();
         }
     }
@@ -160,7 +162,7 @@ public class GamePanel extends JPanel implements ActionListener, Runnable {
      */
     public void checkCollisions() {
         //checks if head collides with body
-        for (int i = bodyParts; i > 0; i--) {
+        for (int i = snake.getSnakeBodyPart(); i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
                 isGameOver = true;
