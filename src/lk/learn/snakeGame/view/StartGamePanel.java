@@ -1,14 +1,14 @@
 package lk.learn.snakeGame.view;
 
-import lk.learn.snakeGame.utils.Config;
+import lk.learn.snakeGame.utils.Util;
 
 import java.awt.*;
 
 public class StartGamePanel {
 
 
-    int WIDTH = Config.SCREEN_WIDTH;
-    int HEIGHT = Config.SCREEN_HEIGHT;
+    int WIDTH = Util.SCREEN_WIDTH;
+    int HEIGHT = Util.SCREEN_HEIGHT;
 
     /**
      * Rendered the screen before game start

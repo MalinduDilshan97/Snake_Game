@@ -1,12 +1,15 @@
 package lk.learn.snakeGame.model;
 
-import lk.learn.snakeGame.utils.Config;
+import lk.learn.snakeGame.utils.Util;
+
+import java.awt.*;
 
 public class Apple {
 
     int appleX;
     int appleY;
-    int appleSize = Config.UNIT_SIZE;
+    int appleSize = Util.UNIT_SIZE;
+    Color appleColor = Util.APPLE_COLOR;
 
     public int getAppleX() {
         return appleX;
@@ -26,5 +29,9 @@ public class Apple {
 
     public int getAppleSize() {
         return appleSize;
+    }
+
+    public Color getAppleColor() {
+        return appleColor;
     }
 }

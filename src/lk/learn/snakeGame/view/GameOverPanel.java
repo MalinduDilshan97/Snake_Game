@@ -1,23 +1,23 @@
 package lk.learn.snakeGame.view;
 
-import lk.learn.snakeGame.utils.Config;
+import lk.learn.snakeGame.utils.Util;
 
 import java.awt.*;
 
 public class GameOverPanel {
 
-    int WIDTH = Config.SCREEN_WIDTH;
-    int HEIGHT = Config.SCREEN_HEIGHT;
+    int WIDTH = Util.SCREEN_WIDTH;
+    int HEIGHT = Util.SCREEN_HEIGHT;
 
     /**
      * renders game over screen
      */
-    public void renderGameOverPanel(Graphics g, int applesEaten) {
+    public void renderGameOverPanel(Graphics g, int score) {
         //Score
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 40));
         FontMetrics metrics1 = g.getFontMetrics(g.getFont());
-        g.drawString("Score: " + applesEaten, (WIDTH - metrics1.stringWidth("Score: " + applesEaten)) / 2,
+        g.drawString("Score: " + score, (WIDTH - metrics1.stringWidth("Score: " + score)) / 2,
                 g.getFont().getSize());
         //Game Over text
         g.setColor(Color.red);
